@@ -177,6 +177,13 @@
             .section { padding: 10px; }
             .grid-2 { gap: 8px; }
         }
+        .baby-qty {
+            display: none;
+            margin-top: 8px;
+        }
+        .baby-qty.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -195,15 +202,68 @@
 
 <script>
     (function(){
-        // ---------- PRECIOS ----------
-        const PRECIOS_SERVICIO = {
-            '1-2': { Economico: 400, Basico: 700, Premium: 800, Especial: 900 },
-            '3-4': { Economico: 500, Basico: 900, Premium: 1000, Especial: 1100 },
-            '5-6': { Economico: 600, Basico: 1100, Premium: 1200, Especial: 1300 },
-            '7': { Economico: 700, Basico: 1300, Premium: 1400, Especial: 1500 }
+        // ---------- PRECIOS ACTUALIZADOS SEGÚN PÁGINA OFICIAL ----------
+        // Planes normales (por rango de peso)
+        const PRECIOS_KG = {
+            NORMAL: { '1-2': 400, '3-4': 500, '5-6': 600, '7': 700 },
+            BASICO: { '1-2': 700, '3-4': 900, '5-6': 1100, '7': 1300 },
+            PREMIUM: { '1-2': 800, '3-4': 1000, '5-6': 1200, '7': 1400 },
+            ESPECIAL: { '1-2': 900, '3-4': 1100, '5-6': 1300, '7': 1500 }
         };
+        
+        // Planes baby (precio fijo por paquete de 5kg)
+        const PRECIOS_BABY = {
+            'BABY EKO 1': { nombre: 'BABY EKO 1', peso: '5kg', precioUnitario: 1500 },
+            'BABY EKO 2': { nombre: 'BABY EKO 2', peso: '5kg', precioUnitario: 2000 }
+        };
+        
+        // Precios de mensajería
         const COSTO_MENSAJERIA = { 'Zona Corta $600': 600, 'Zona Media $900': 900, 'Zona Larga $1200': 1200 };
         const ZONA_KEYWORDS = { 'corta': 'Zona Corta $600', 'media': 'Zona Media $900', 'larga': 'Zona Larga $1200', 'centro': 'Zona Corta $600', 'sur': 'Zona Media $900', 'norte': 'Zona Larga $1200' };
+        
+        // Lista completa de extras (según página oficial)
+        const PRECIOS_EXTRAS = {
+            // Lavados especiales por color
+            dlrBlanca: 300,
+            dlrOscura: 300,
+            dlrColor: 300,
+            // Aromas
+            fragancia: 400,
+            perlas: 300,
+            perfume: 300,
+            // Estado de ropa
+            semiSucio: 200,
+            sucio: 400,
+            manchado: 800,
+            // Peluches y otros
+            peluchePeq: 300,
+            pelucheMed: 500,
+            mantaBebe: 400,
+            edredonCuna: 600,
+            protectorColchon: 500,
+            // Extras adicionales
+            tratamientoManchas: 300,
+            empaquePremium: 200
+        };
+        
+        const EXTRAS_NOMBRES = {
+            dlrBlanca: 'D.L.R Blanca',
+            dlrOscura: 'D.L.R Oscura',
+            dlrColor: 'D.L.R Color',
+            fragancia: 'Fragancia',
+            perlas: 'Perlas',
+            perfume: 'Perfume',
+            semiSucio: 'Semi Sucio',
+            sucio: 'Sucio',
+            manchado: 'Manchado',
+            peluchePeq: 'Peluches pequeños (c/u)',
+            pelucheMed: 'Peluches medianos (c/u)',
+            mantaBebe: 'Manta de bebé',
+            edredonCuna: 'Edredón de cuna',
+            protectorColchon: 'Protector de colchón',
+            tratamientoManchas: 'Tratamiento antimanchas intensivo',
+            empaquePremium: 'Empaque Premium adicional'
+        };
         
         // helpers DOM
         const $ = (id) => document.getElementById(id);
@@ -220,39 +280,75 @@
             return `${y}${m}${day}-${r}`;
         }
         
-        // Cálculos financieros
-        function calcService() { let w = getVal('weightRange','1-2'); let t = getVal('serviceType','Economico'); return PRECIOS_SERVICIO[w]?.[t] || 0; }
-        function calcExtras() { let total=0; if(getChecked('extraColor')) total+=300; if(getChecked('extraBlanca')) total+=300; if(getChecked('extraOscura')) total+=300; if(getChecked('extraPerfume')) total+=300; if(getChecked('extraPerla')) total+=300; if(getChecked('extraFragancia')) total+=300; return total; }
-        function calcDirt() { let total=0; if(getChecked('ropaSemisucia')) total+=200; if(getChecked('ropaSucia')) total+=400; if(getChecked('ropaManchada')) total+=800; return total; }
-        function calcDelivery() { let z = getVal('zoneSelect','Zona Corta $600'); return COSTO_MENSAJERIA[z] || 0; }
+        // Determinar si el plan seleccionado es baby
+        function isBabyPlan() {
+            const plan = getVal('serviceType');
+            return plan === 'BABY EKO 1' || plan === 'BABY EKO 2';
+        }
+        
+        // Cálculo del servicio base
+        function calcService() {
+            const plan = getVal('serviceType');
+            
+            // Planes baby
+            if (plan === 'BABY EKO 1') {
+                const cantidad = parseInt(getVal('babyQty', '1')) || 1;
+                return PRECIOS_BABY['BABY EKO 1'].precioUnitario * cantidad;
+            }
+            if (plan === 'BABY EKO 2') {
+                const cantidad = parseInt(getVal('babyQty', '1')) || 1;
+                return PRECIOS_BABY['BABY EKO 2'].precioUnitario * cantidad;
+            }
+            
+            // Planes normales
+            const peso = getVal('weightRange', '1-2');
+            const precioPlan = PRECIOS_KG[plan];
+            return precioPlan ? (precioPlan[peso] || 0) : 0;
+        }
+        
+        // Cálculo de extras
+        function calcExtras() {
+            let total = 0;
+            for (const [extra, precio] of Object.entries(PRECIOS_EXTRAS)) {
+                if (getChecked(`extra_${extra}`)) {
+                    total += precio;
+                }
+            }
+            return total;
+        }
+        
+        function calcDelivery() {
+            let z = getVal('zoneSelect','Zona Corta $600');
+            return COSTO_MENSAJERIA[z] || 0;
+        }
         
         function actualizarTotales() {
             let serv = calcService();
             let extra = calcExtras();
-            let dirt = calcDirt();
             let iron = parseFloat(getVal('ironCost','0')) || 0;
             let delivery = calcDelivery();
-            let total = serv+extra+dirt+iron+delivery;
+            let total = serv + extra + iron + delivery;
+            
             if($('servMount')) $('servMount').innerText = `$${serv}`;
             if($('extraMount')) $('extraMount').innerText = `$${extra}`;
-            if($('dirtMount')) $('dirtMount').innerText = `$${dirt}`;
             if($('ironMount')) $('ironMount').innerText = `$${iron}`;
             if($('deliveryMount')) $('deliveryMount').innerText = `$${delivery}`;
             if($('totalMount')) $('totalMount').innerText = `$${total}`;
+            
             let pago = parseFloat(getVal('receivedPay','0')) || 0;
             let cambio = pago - total;
             if($('changeMount')) $('changeMount').innerText = cambio>=0 ? `$${cambio}` : `-$${Math.abs(cambio)}`;
             if($('hiddenTotal')) $('hiddenTotal').value = total;
-        }
-        
-        // Auto sugerencias (solo para mejorar UX, sin guardado)
-        function setupAuto(inputId, fieldKey) {
-            // Función inerte sin historial real, pero mantenemos la estructura básica para sugerencias vacías.
-            // Como ya no hay historial, no se muestran sugerencias. Se deja para no romper nada.
-        }
-        
-        function autoFillClient() {
-            // Sin historial, esta función no hace nada. Se mantiene para evitar errores.
+            
+            // Mostrar/ocultar campo de cantidad para planes baby
+            const babyQtyDiv = $('babyQtyDiv');
+            if (babyQtyDiv) {
+                if (isBabyPlan()) {
+                    babyQtyDiv.classList.add('active');
+                } else {
+                    babyQtyDiv.classList.remove('active');
+                }
+            }
         }
         
         function suggestZoneByAddress() {
@@ -263,7 +359,7 @@
             }
         }
         
-        // ---------- GENERACIÓN DE TXT MEJORADA (más limpia y organizada) ----------
+        // ---------- GENERACIÓN DE TXT ----------
         function generarTXT() {
             const orden = getVal('ordNum') || generarNumeroOrden();
             const cliente = getVal('cliName') || '---';
@@ -272,26 +368,26 @@
             const fechaEnt = getVal('delDate') || '---';
             const direccion = getVal('address') || '---';
             const zona = getVal('zoneSelect') || '---';
-            const peso = getVal('weightRange');
-            const tipo = getVal('serviceType');
-            const costoServ = calcService();
+            const plan = getVal('serviceType');
             
-            // Extras activos (lista legible)
+            let precioBase = calcService();
+            let descripcionPlan = plan;
+            if (isBabyPlan()) {
+                const cantidad = getVal('babyQty', '1');
+                descripcionPlan = `${plan} (${cantidad} paquete(s) de 5kg)`;
+            } else {
+                const peso = getVal('weightRange');
+                descripcionPlan = `${plan} - ${peso} kg`;
+            }
+            
+            // Extras activos
             const extrasActivos = [];
-            if(getChecked('extraColor')) extrasActivos.push('Ropa COLOR');
-            if(getChecked('extraBlanca')) extrasActivos.push('Ropa BLANCA');
-            if(getChecked('extraOscura')) extrasActivos.push('Ropa OSCURA');
-            if(getChecked('extraPerfume')) extrasActivos.push('Perfume');
-            if(getChecked('extraPerla')) extrasActivos.push('Perla Olor');
-            if(getChecked('extraFragancia')) extrasActivos.push('Fragancia');
+            for (const [extra, precio] of Object.entries(PRECIOS_EXTRAS)) {
+                if (getChecked(`extra_${extra}`)) {
+                    extrasActivos.push(`${EXTRAS_NOMBRES[extra]} (+$${precio})`);
+                }
+            }
             const extrasTexto = extrasActivos.length ? extrasActivos.join(', ') : 'Ninguno';
-            
-            // Estado de ropa
-            const estadoRopa = [];
-            if(getChecked('ropaSemisucia')) estadoRopa.push('Semisucia (+$200)');
-            if(getChecked('ropaSucia')) estadoRopa.push('Sucia (+$400)');
-            if(getChecked('ropaManchada')) estadoRopa.push('Manchada (+$800)');
-            const estadoTexto = estadoRopa.length ? estadoRopa.join(', ') : 'Ninguno';
             
             const prendas = getVal('garments') || '';
             const planchDesc = getVal('ironDesc') || '';
@@ -301,16 +397,14 @@
             const direccionMensajeria = getVal('courierAddr') || '';
             
             const extraMonto = calcExtras();
-            const dirtMonto = calcDirt();
             const deliveryMonto = calcDelivery();
-            const total = costoServ + extraMonto + dirtMonto + planchCosto + deliveryMonto;
+            const total = precioBase + extraMonto + planchCosto + deliveryMonto;
             const recibido = parseFloat(getVal('receivedPay','0')) || 0;
             const cambio = recibido - total;
             const firmaEncargado = getVal('signStaff') || '_________________________';
             const firmaCliente = getVal('signClient') || '_________________________';
             const piezas = getVal('pieces') || '';
             
-            // Construcción con formato limpio y secciones
             let txt = '';
             txt += '╔══════════════════════════════════════════════════════════════╗\n';
             txt += '║                 LAVANDERÍA EKO - ORDEN DE SERVICIO           ║\n';
@@ -331,19 +425,16 @@
             txt += '┌──────────────────────────────────────────────────────────────┐\n';
             txt += '│ SERVICIO DE LAVANDERÍA                                      │\n';
             txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ PESO            : ${peso.padEnd(42)}│\n`;
-            txt += `│ TIPO            : ${tipo.padEnd(42)}│\n`;
-            txt += `│ COSTO SERVICIO  : $${costoServ.toString().padStart(5)}                                      │\n`;
+            txt += `│ PLAN            : ${descripcionPlan.padEnd(42)}│\n`;
+            txt += `│ COSTO SERVICIO  : $${precioBase.toString().padStart(5)}                                      │\n`;
             txt += '└──────────────────────────────────────────────────────────────┘\n\n';
             
-            if(extrasActivos.length > 0 || estadoRopa.length > 0 || planchCosto > 0) {
+            if(extrasActivos.length > 0 || planchCosto > 0) {
                 txt += '┌──────────────────────────────────────────────────────────────┐\n';
                 txt += '│ EXTRAS Y ADICIONALES                                        │\n';
                 txt += '├──────────────────────────────────────────────────────────────┤\n';
                 if(extrasActivos.length) txt += `│ EXTRAS         : ${extrasTexto.padEnd(42)}│\n`;
                 txt += `│ MONTO EXTRAS   : $${extraMonto.toString().padStart(5)}                                      │\n`;
-                if(estadoRopa.length) txt += `│ ESTADO ROPA    : ${estadoTexto.padEnd(42)}│\n`;
-                txt += `│ COSTO ESTADO   : $${dirtMonto.toString().padStart(5)}                                      │\n`;
                 if(planchDesc) txt += `│ PLANCHADO      : ${planchDesc.padEnd(42)}│\n`;
                 txt += `│ COSTO PLANCHADO: $${planchCosto.toString().padStart(5)}                                      │\n`;
                 txt += '└──────────────────────────────────────────────────────────────┘\n\n';
@@ -374,9 +465,8 @@
             txt += '┌──────────────────────────────────────────────────────────────┐\n';
             txt += '│ RESUMEN DE COBRO                                             │\n';
             txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ Servicio de lavandería  : $${costoServ.toString().padStart(8)}                              │\n`;
+            txt += `│ Servicio de lavandería  : $${precioBase.toString().padStart(8)}                              │\n`;
             txt += `│ Extras                   : $${extraMonto.toString().padStart(8)}                              │\n`;
-            txt += `│ Estado de ropa           : $${dirtMonto.toString().padStart(8)}                              │\n`;
             txt += `│ Planchado                : $${planchCosto.toString().padStart(8)}                              │\n`;
             txt += `│ Mensajería               : $${deliveryMonto.toString().padStart(8)}                              │\n`;
             txt += '├──────────────────────────────────────────────────────────────┤\n';
@@ -445,20 +535,55 @@
             }, 2300);
         }
         
-        // Construcción del formulario (sin botones extra, sin autoguardado)
+        // Construcción del formulario
         function construirFormulario() {
             const root = $('formRoot');
             if(!root) return;
+            
+            // Construir lista de extras en HTML
+            let extrasHtml = '';
+            const categoriasExtras = {
+                'Lavados por color': ['dlrBlanca', 'dlrOscura', 'dlrColor'],
+                'Aromas': ['fragancia', 'perlas', 'perfume'],
+                'Estado de la ropa': ['semiSucio', 'sucio', 'manchado'],
+                'Peluches y artículos': ['peluchePeq', 'pelucheMed', 'mantaBebe', 'edredonCuna', 'protectorColchon'],
+                'Extras adicionales': ['tratamientoManchas', 'empaquePremium']
+            };
+            
+            for (const [categoria, extras] of Object.entries(categoriasExtras)) {
+                extrasHtml += `<div class="section"><h4>${categoria}</h4><div class="check-row">`;
+                for (const extra of extras) {
+                    extrasHtml += `<label><input type="checkbox" id="extra_${extra}"> ${EXTRAS_NOMBRES[extra]} (+$${PRECIOS_EXTRAS[extra]})</label>`;
+                }
+                extrasHtml += `</div></div>`;
+            }
+            
             root.innerHTML = `
                 <div class="section"><h4>Datos del Cliente</h4><div class="grid-2"><div class="field"><label>N° Orden (opcional)</label><input type="text" id="ordNum" placeholder="Auto-generado"></div><div class="field"><label>Cliente</label><input type="text" id="cliName"></div><div class="field"><label>Teléfono</label><input type="tel" id="cliPhone"></div><div class="field"><label>Fecha Recepción</label><input type="date" id="recDate"></div><div class="field"><label>Fecha Entrega</label><input type="date" id="delDate"></div><div class="field"><label>Dirección</label><input type="text" id="address"></div><div class="field"><label>Zona mensajería</label><select id="zoneSelect"><option value="Zona Corta $600">Zona Corta ($600)</option><option value="Zona Media $900">Zona Media ($900)</option><option value="Zona Larga $1200">Zona Larga ($1200)</option></select></div></div></div>
-                <div class="section"><h4>Servicio de Lavandería</h4><div class="grid-2"><div class="field"><label>Peso (kg)</label><select id="weightRange"><option value="1-2">1-2 kg</option><option value="3-4">3-4 kg</option><option value="5-6">5-6 kg</option><option value="7">7 kg</option></select></div><div class="field"><label>Tipo de servicio</label><select id="serviceType"><option value="Economico">Económico</option><option value="Basico">Básico</option><option value="Premium">Premium</option><option value="Especial">Especial</option></select></div></div></div>
-                <div class="section"><h4>Lavados adicionales</h4><div class="check-row"><label><input type="checkbox" id="extraColor"> Ropa Color (+$300)</label><label><input type="checkbox" id="extraBlanca"> Ropa Blanca (+$300)</label><label><input type="checkbox" id="extraOscura"> Ropa Oscura (+$300)</label></div></div>
-                <div class="section"><h4>Aromas</h4><div class="check-row"><label><input type="checkbox" id="extraPerla"> Perla Olor (+$300)</label><label><input type="checkbox" id="extraPerfume"> Perfume (+$300)</label><label><input type="checkbox" id="extraFragancia"> Fragancia (+$300)</label></div></div>
-                <div class="section"><h4>Estado de la ropa</h4><div class="check-row"><label><input type="checkbox" id="ropaSemisucia"> Semisucia (+$200)</label><label><input type="checkbox" id="ropaSucia"> Sucia (+$400)</label><label><input type="checkbox" id="ropaManchada"> Manchada (+$800)</label></div></div>
+                
+                <div class="section"><h4>Plan de Servicio</h4><div class="grid-2"><div class="field"><label>Tipo de plan</label><select id="serviceType">
+                    <option value="NORMAL">NORMAL</option>
+                    <option value="BASICO">BÁSICO</option>
+                    <option value="PREMIUM">PREMIUM</option>
+                    <option value="ESPECIAL">ESPECIAL</option>
+                    <option value="BABY EKO 1">BABY EKO 1 (5kg - $1500)</option>
+                    <option value="BABY EKO 2">BABY EKO 2 (5kg - $2000)</option>
+                </select></div>
+                <div class="field"><label>Rango de peso (kg)</label><select id="weightRange">
+                    <option value="1-2">1-2 kg</option>
+                    <option value="3-4">3-4 kg</option>
+                    <option value="5-6">5-6 kg</option>
+                    <option value="7">7 kg</option>
+                </select></div>
+                <div id="babyQtyDiv" class="baby-qty field"><label>Cantidad de paquetes (5kg c/u)</label><input type="number" id="babyQty" value="1" min="1" step="1"></div>
+                </div></div>
+                
+                ${extrasHtml}
+                
                 <div class="section"><h4>Prendas / Detalle</h4><textarea id="garments" rows="2" placeholder="Ej: Camisas x3 (1.2 kg), Pantalones x2 (1.5 kg)"></textarea></div>
                 <div class="section"><h4>Planchado</h4><div class="grid-2"><div class="field"><label>Descripción</label><input type="text" id="ironDesc" placeholder="Ej: Camisas, pantalones"></div><div class="field"><label>Costo ($)</label><input type="number" id="ironCost" value="0" step="100"></div></div></div>
                 <div class="section"><h4>Mensajería</h4><div class="check-row"><label><input type="checkbox" id="msgPickup"> Recogida a domicilio</label><label><input type="checkbox" id="msgDelivery"> Entrega a domicilio</label></div><div class="field"><input type="text" id="courierAddr" placeholder="Dirección para mensajería (si aplica)"></div></div>
-                <div class="section"><h4>Resumen de cobro</h4><div class="totales"><div>Servicio: <span id="servMount">$0</span></div><div>Extras: <span id="extraMount">$0</span></div><div>Estado ropa: <span id="dirtMount">$0</span></div><div>Planchado: <span id="ironMount">$0</span></div><div>Mensajería: <span id="deliveryMount">$0</span></div><div><strong>TOTAL: <span id="totalMount">$0</span></strong></div></div><div class="grid-2"><div class="field"><label>Monto recibido ($)</label><input type="number" id="receivedPay" value="0" step="100"></div><div class="field"><label>Cambio / faltante</label><span id="changeMount">$0</span></div></div><input type="hidden" id="hiddenTotal"></div>
+                <div class="section"><h4>Resumen de cobro</h4><div class="totales"><div>Servicio: <span id="servMount">$0</span></div><div>Extras: <span id="extraMount">$0</span></div><div>Planchado: <span id="ironMount">$0</span></div><div>Mensajería: <span id="deliveryMount">$0</span></div><div><strong>TOTAL: <span id="totalMount">$0</span></strong></div></div><div class="grid-2"><div class="field"><label>Monto recibido ($)</label><input type="number" id="receivedPay" value="0" step="100"></div><div class="field"><label>Cambio / faltante</label><span id="changeMount">$0</span></div></div><input type="hidden" id="hiddenTotal"></div>
                 <div class="section"><h4>Firmas</h4><div class="grid-2"><div class="field"><label>Encargado</label><input type="text" id="signStaff" placeholder="Nombre"></div><div class="field"><label>Cliente</label><input type="text" id="signClient" placeholder="Nombre"></div></div></div>
                 <div class="section"><h4>Observaciones / Piezas especiales</h4><textarea id="pieces" rows="2" placeholder="Detalles adicionales, conteo de piezas, etc."></textarea></div>
             `;
@@ -470,14 +595,22 @@
             if(!getVal('delDate')) setVal('delDate', futuro);
             
             // Eventos para actualizar totales
-            const eventos = ['weightRange','serviceType','extraColor','extraBlanca','extraOscura','extraPerfume','extraPerla','extraFragancia','ropaSemisucia','ropaSucia','ropaManchada','zoneSelect','ironCost','receivedPay'];
+            const eventos = ['serviceType', 'weightRange', 'babyQty', 'zoneSelect', 'ironCost', 'receivedPay'];
+            // Añadir eventos para todos los extras
+            for (const extra of Object.keys(PRECIOS_EXTRAS)) {
+                eventos.push(`extra_${extra}`);
+            }
+            
             eventos.forEach(id => {
                 const el = $(id);
                 if(el) el.addEventListener('change', actualizarTotales);
+                if(el && id.includes('extra')) el.addEventListener('change', actualizarTotales);
             });
             $('ironCost')?.addEventListener('input', actualizarTotales);
             $('receivedPay')?.addEventListener('input', actualizarTotales);
             $('address')?.addEventListener('blur', suggestZoneByAddress);
+            $('serviceType')?.addEventListener('change', actualizarTotales);
+            $('babyQty')?.addEventListener('input', actualizarTotales);
             
             actualizarTotales();
         }
