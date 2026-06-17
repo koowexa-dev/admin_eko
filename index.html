@@ -26,7 +26,7 @@
             background: white;
             border-radius: 20px;
             padding: 18px 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
         }
 
@@ -92,7 +92,9 @@
             letter-spacing: 0.3px;
         }
 
-        input, select, textarea {
+        input,
+        select,
+        textarea {
             padding: 8px 10px;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
@@ -101,14 +103,22 @@
             font-family: inherit;
         }
 
+        input:read-only {
+            background: #f1f5f9;
+            color: #475569;
+            cursor: not-allowed;
+        }
+
         textarea {
             resize: vertical;
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus,
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: #2c6e9e;
-            box-shadow: 0 0 0 2px rgba(44,110,158,0.1);
+            box-shadow: 0 0 0 2px rgba(44, 110, 158, 0.1);
         }
 
         .check-vertical {
@@ -117,6 +127,7 @@
             gap: 8px;
             margin-top: 4px;
         }
+
         .check-vertical label {
             display: flex;
             align-items: center;
@@ -130,6 +141,7 @@
             cursor: pointer;
             transition: 0.1s ease;
         }
+
         .check-vertical label:hover {
             background: #eef2ff;
             border-color: #b9d0f0;
@@ -152,7 +164,7 @@
             padding: 6px 10px;
             border-radius: 40px;
             text-align: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
         }
 
         .actions {
@@ -162,6 +174,7 @@
             gap: 12px;
             margin-top: 18px;
         }
+
         button {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
@@ -172,16 +185,25 @@
             cursor: pointer;
             transition: 0.05s linear;
         }
+
         button.primary {
             background: #2c6e9e;
             color: white;
             border: none;
         }
+
+        button.whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+        }
+
         button.small {
             background: #eef2ff;
             padding: 4px 12px;
             font-size: 0.75rem;
         }
+
         button.danger {
             background: #fee2e2;
             border-color: #fecaca;
@@ -207,9 +229,14 @@
             opacity: 0;
             visibility: hidden;
         }
+
         @media (max-width: 560px) {
-            .card { padding: 14px; }
-            .section { padding: 10px; }
+            .card {
+                padding: 14px;
+            }
+            .section {
+                padding: 10px;
+            }
         }
 
         .servicios-container {
@@ -218,6 +245,7 @@
             gap: 14px;
             margin-bottom: 12px;
         }
+
         .servicio-item {
             background: #fefce8;
             border: 1px solid #fde047;
@@ -225,12 +253,14 @@
             padding: 14px;
             transition: 0.1s;
         }
+
         .servicio-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
+
         .servicio-header span {
             font-weight: 600;
             color: #854d0e;
@@ -239,11 +269,13 @@
             padding: 4px 12px;
             border-radius: 40px;
         }
+
         .servicio-fields {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
         .remove-servicio {
             background: none;
             border: none;
@@ -254,6 +286,7 @@
             padding: 4px 8px;
             border-radius: 30px;
         }
+
         .add-servicio-btn {
             margin-top: 6px;
             background: #e6f7e6;
@@ -262,9 +295,11 @@
             border-radius: 40px;
             font-weight: 500;
         }
+
         hr {
             margin: 4px 0;
         }
+
         .total-destacado {
             font-weight: 800;
             font-size: 1rem;
@@ -273,524 +308,754 @@
     </style>
 </head>
 <body>
-<div class="app">
-    <div class="card">
-        <h1>Lavandería EKKO</h1>
-        <div class="sub">Administración de órdenes</div>
-        <div id="formRoot"></div>
-        <div class="actions">
-            <button id="previewBtn">Previsualizar TXT</button>
-            <button id="downloadBtn" class="primary">Descargar TXT</button>
+    <div class="app">
+        <div class="card">
+            <h1>Lavandería EKKO</h1>
+            <div class="sub">Administración de órdenes</div>
+            <div id="formRoot"></div>
+            <div class="actions">
+                <button id="previewBtn">Previsualizar TXT</button>
+                <button id="downloadBtn" class="primary">Descargar TXT</button>
+                <button id="whatsappBtn" class="whatsapp">Enviar por WhatsApp</button>
+            </div>
         </div>
     </div>
-</div>
-<div id="globalToast" class="toast">Mensaje</div>
+    <div id="globalToast" class="toast">Mensaje</div>
 
-<script>
-    (function(){
-        // ========== CONFIGURACIÓN DE PRECIOS ==========
-        const PRECIOS_KG = {
-            NORMAL: { '1-2': 400, '3-4': 500, '5-6': 600, '7': 700 },
-            BASICO: { '1-2': 700, '3-4': 900, '5-6': 1100, '7': 1300 },
-            PREMIUM: { '1-2': 800, '3-4': 1000, '5-6': 1200, '7': 1400 },
-            ESPECIAL: { '1-2': 900, '3-4': 1100, '5-6': 1300, '7': 1500 }
-        };
-        
-        const PRECIOS_BABY = {
-            'BABY EKKO 1': { nombre: 'BABY EKKO 1', peso: '5kg', precioUnitario: 1500 },
-            'BABY EKKO 2': { nombre: 'BABY EKKO 2', peso: '5kg', precioUnitario: 2000 }
-        };
-        
-        const COSTO_MENSAJERIA = { 
-            'Zona Corta $600': 600, 
-            'Zona Media $900': 900, 
-            'Zona Larga $1200': 1200 
-        };
-        const ZONA_KEYWORDS = { 
-            'corta': 'Zona Corta $600', 'media': 'Zona Media $900', 'larga': 'Zona Larga $1200', 
-            'centro': 'Zona Corta $600', 'sur': 'Zona Media $900', 'norte': 'Zona Larga $1200' 
-        };
-        
-        const PRECIOS_EXTRAS = {
-            dlrBlanca: 300, dlrOscura: 300, dlrColor: 300,
-            fragancia: 400, perlas: 600, perfume: 300,
-            semiSucio: 200, sucio: 400, manchado: 800,
-            peluchePeq: 300, pelucheMed: 500, mantaBebe: 400, edredonCuna: 600, protectorColchon: 500,
-            tratamientoManchas: 300
-        };
-        
-        // Nombres sin emojis
-        const EXTRAS_NOMBRES = {
-            dlrBlanca: 'D.L.R Blanca', dlrOscura: 'D.L.R Oscura', dlrColor: 'D.L.R Color',
-            fragancia: 'Fragancia', perlas: 'Perlas', perfume: 'Perfume',
-            semiSucio: 'Semi Sucio', sucio: 'Sucio', manchado: 'Manchado',
-            peluchePeq: 'Peluche pequeño (c/u)', pelucheMed: 'Peluche mediano (c/u)',
-            mantaBebe: 'Manta de bebé', edredonCuna: 'Edredón de cuna', protectorColchon: 'Protector colchón',
-            tratamientoManchas: 'Tratamiento intenso para bebés'
-        };
-        
-        const CATEGORIAS_EXTRAS = {
-            'Lavados por color': ['dlrBlanca', 'dlrOscura', 'dlrColor'],
-            'Aromas': ['fragancia', 'perlas', 'perfume'],
-            'Estado de la ropa': ['semiSucio', 'sucio', 'manchado'],
-            'Peluches y artículos': ['peluchePeq', 'pelucheMed', 'mantaBebe', 'edredonCuna', 'protectorColchon'],
-            'Extras adicionales': ['tratamientoManchas']
-        };
-        
-        // ========== ESTADO GLOBAL ==========
-        let servicios = [];
-        let nextId = 1;
-        
-        const $ = (id) => document.getElementById(id);
-        const getVal = (id, def='') => { let e = $(id); return e ? (e.value||'').trim()||def : def; };
-        const getChecked = (id) => { let e = $(id); return e ? e.checked : false; };
-        const setVal = (id, val) => { let e = $(id); if(e) e.value = val; };
-        
-        function generarNumeroOrden() {
-            let d = new Date();
-            let y = d.getFullYear();
-            let m = (d.getMonth()+1).toString().padStart(2,'0');
-            let day = d.getDate().toString().padStart(2,'0');
-            let r = Math.random().toString(36).substring(2,6).toUpperCase();
-            return `${y}${m}${day}-${r}`;
-        }
-        
-        function calcularCostoServicio(serv) {
-            const plan = serv.tipo;
-            if (plan === 'BABY EKKO 1') {
-                const cantidad = serv.babyQty || 1;
-                return PRECIOS_BABY['BABY EKKO 1'].precioUnitario * cantidad;
+    <script>
+        (function() {
+
+            // ============================================================
+            // 1. CONFIGURACIÓN DE PRECIOS
+            // ============================================================
+
+            const PRECIOS_KG = {
+                NORMAL: { '1-2': 400, '3-4': 500, '5-6': 600, '7': 700 },
+                BASICO: { '1-2': 700, '3-4': 900, '5-6': 1100, '7': 1300 },
+                PREMIUM: { '1-2': 800, '3-4': 1000, '5-6': 1200, '7': 1400 },
+                ESPECIAL: { '1-2': 900, '3-4': 1100, '5-6': 1300, '7': 1500 }
+            };
+
+            const PRECIOS_BABY = {
+                'BABY EKKO 1': { nombre: 'BABY EKKO 1', peso: '5kg', precioUnitario: 1500 },
+                'BABY EKKO 2': { nombre: 'BABY EKKO 2', peso: '5kg', precioUnitario: 2000 }
+            };
+
+            const COSTO_MENSAJERIA = {
+                'Zona Corta $600': 600,
+                'Zona Media $900': 900,
+                'Zona Larga $1200': 1200
+            };
+
+            const ZONA_KEYWORDS = {
+                'corta': 'Zona Corta $600',
+                'media': 'Zona Media $900',
+                'larga': 'Zona Larga $1200',
+                'centro': 'Zona Corta $600',
+                'sur': 'Zona Media $900',
+                'norte': 'Zona Larga $1200'
+            };
+
+            const PRECIOS_EXTRAS = {
+                dlrBlanca: 300,
+                dlrOscura: 300,
+                dlrColor: 300,
+                fragancia: 400,
+                perlas: 600,
+                perfume: 300,
+                semiSucio: 200,
+                sucio: 400,
+                manchado: 800,
+                peluchePeq: 300,
+                pelucheMed: 500,
+                mantaBebe: 400,
+                edredonCuna: 600,
+                protectorColchon: 500,
+                tratamientoManchas: 300
+            };
+
+            const EXTRAS_NOMBRES = {
+                dlrBlanca: 'D.L.R Blanca',
+                dlrOscura: 'D.L.R Oscura',
+                dlrColor: 'D.L.R Color',
+                fragancia: 'Fragancia',
+                perlas: 'Perlas',
+                perfume: 'Perfume',
+                semiSucio: 'Semi Sucio',
+                sucio: 'Sucio',
+                manchado: 'Manchado',
+                peluchePeq: 'Peluche pequeno (c/u)',
+                pelucheMed: 'Peluche mediano (c/u)',
+                mantaBebe: 'Manta de bebe',
+                edredonCuna: 'Edredon de cuna',
+                protectorColchon: 'Protector colchon',
+                tratamientoManchas: 'Tratamiento intenso para bebes'
+            };
+
+            const CATEGORIAS_EXTRAS = {
+                'Lavados por color': ['dlrBlanca', 'dlrOscura', 'dlrColor'],
+                'Aromas': ['fragancia', 'perlas', 'perfume'],
+                'Estado de la ropa': ['semiSucio', 'sucio', 'manchado'],
+                'Peluches y articulos': ['peluchePeq', 'pelucheMed', 'mantaBebe', 'edredonCuna', 'protectorColchon'],
+                'Extras adicionales': ['tratamientoManchas']
+            };
+
+            // ============================================================
+            // 2. ESTADO GLOBAL
+            // ============================================================
+
+            let servicios = [];
+            let nextId = 1;
+
+            const $ = (id) => document.getElementById(id);
+            const getVal = (id, def) => { const e = $(id); return e ? (e.value || '').trim() || def || '' : ''; };
+            const getChecked = (id) => { const e = $(id); return e ? e.checked : false; };
+            const setVal = (id, val) => { const e = $(id); if (e) e.value = val; };
+
+            // ============================================================
+            // 3. UTILIDADES
+            // ============================================================
+
+            function generarNumeroOrden() {
+                const d = new Date();
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const r = Math.random().toString(36).substring(2, 6).toUpperCase();
+                return y + m + day + '-' + r;
             }
-            if (plan === 'BABY EKKO 2') {
-                const cantidad = serv.babyQty || 1;
-                return PRECIOS_BABY['BABY EKKO 2'].precioUnitario * cantidad;
+
+            function toastMsg(msg, isErr) {
+                const t = $('globalToast');
+                if (!t) return;
+                t.innerText = msg;
+                t.style.backgroundColor = isErr ? '#b91c1c' : '#1e293b';
+                t.style.visibility = 'visible';
+                t.style.opacity = '1';
+                setTimeout(function() {
+                    t.style.opacity = '0';
+                    setTimeout(function() { t.style.visibility = 'hidden'; }, 250);
+                }, 2300);
             }
-            const peso = serv.rangoPeso || '1-2';
-            const precioPlan = PRECIOS_KG[plan];
-            return precioPlan ? (precioPlan[peso] || 0) : 0;
-        }
-        
-        function calcTotalServicios() {
-            return servicios.reduce((sum, serv) => sum + calcularCostoServicio(serv), 0);
-        }
-        
-        function calcExtras() {
-            let total = 0;
-            for (const [extra, precio] of Object.entries(PRECIOS_EXTRAS)) {
-                if (getChecked(`extra_${extra}`)) total += precio;
-            }
-            return total;
-        }
-        
-        function calcDelivery() {
-            let z = getVal('zoneSelect','Zona Corta $600');
-            return COSTO_MENSAJERIA[z] || 0;
-        }
-        
-        function actualizarTotales() {
-            let servTotal = calcTotalServicios();
-            let extra = calcExtras();
-            let iron = parseFloat(getVal('ironCost','0')) || 0;
-            let delivery = calcDelivery();
-            let total = servTotal + extra + iron + delivery;
-            
-            if($('servMount')) $('servMount').innerText = `$${servTotal}`;
-            if($('extraMount')) $('extraMount').innerText = `$${extra}`;
-            if($('ironMount')) $('ironMount').innerText = `$${iron}`;
-            if($('deliveryMount')) $('deliveryMount').innerText = `$${delivery}`;
-            if($('totalMount')) $('totalMount').innerText = `$${total}`;
-            
-            let pago = parseFloat(getVal('receivedPay','0')) || 0;
-            let cambio = pago - total;
-            if($('changeMount')) $('changeMount').innerHTML = cambio>=0 ? `$${cambio}` : `-$${Math.abs(cambio)}`;
-            if($('hiddenTotal')) $('hiddenTotal').value = total;
-        }
-        
-        function suggestZoneByAddress() {
-            let addr = getVal('address').toLowerCase();
-            if(!addr) return;
-            for(let [k,zone] of Object.entries(ZONA_KEYWORDS)) {
-                if(addr.includes(k)) { setVal('zoneSelect', zone); actualizarTotales(); break; }
-            }
-        }
-        
-        function renderServicios() {
-            const container = $('serviciosListContainer');
-            if(!container) return;
-            if(servicios.length === 0) {
-                container.innerHTML = '<div style="padding: 12px; text-align:center; background:#f9f9f9; border-radius:16px;">+ Agrega servicios usando el botón inferior</div>';
-            } else {
-                container.innerHTML = '';
-                servicios.forEach((serv, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'servicio-item';
-                    div.dataset.id = serv.id;
-                    const costoUnit = calcularCostoServicio(serv);
-                    const isBaby = serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2';
-                    div.innerHTML = `
-                        <div class="servicio-header">
-                            <span>Servicio #${idx+1}</span>
-                            <button class="remove-servicio" data-id="${serv.id}" title="Eliminar">X</button>
-                        </div>
-                        <div class="servicio-fields">
-                            <div class="field">
-                                <label>TIPO PLAN</label>
-                                <select class="serv-tipo" data-id="${serv.id}">
-                                    <option value="NORMAL" ${serv.tipo==='NORMAL'?'selected':''}>NORMAL</option>
-                                    <option value="BASICO" ${serv.tipo==='BASICO'?'selected':''}>BÁSICO</option>
-                                    <option value="PREMIUM" ${serv.tipo==='PREMIUM'?'selected':''}>PREMIUM</option>
-                                    <option value="ESPECIAL" ${serv.tipo==='ESPECIAL'?'selected':''}>ESPECIAL</option>
-                                    <option value="BABY EKKO 1" ${serv.tipo==='BABY EKKO 1'?'selected':''}>BABY EKKO 1 (BÁSICO)</option>
-                                    <option value="BABY EKKO 2" ${serv.tipo==='BABY EKKO 2'?'selected':''}>BABY EKKO 2 (PREMIUM)</option>
-                                </select>
-                            </div>
-                            <div class="field" id="pesoField_${serv.id}" style="${isBaby ? 'display:none' : ''}">
-                                <label>RANGO DE PESO (kg)</label>
-                                <select class="serv-peso" data-id="${serv.id}">
-                                    <option value="1-2" ${serv.rangoPeso==='1-2'?'selected':''}>1-2 kg</option>
-                                    <option value="3-4" ${serv.rangoPeso==='3-4'?'selected':''}>3-4 kg</option>
-                                    <option value="5-6" ${serv.rangoPeso==='5-6'?'selected':''}>5-6 kg</option>
-                                    <option value="7" ${serv.rangoPeso==='7'?'selected':''}>7 kg</option>
-                                </select>
-                            </div>
-                            <div class="field" id="babyQtyField_${serv.id}" style="${isBaby ? '' : 'display:none'}">
-                                <label>CANTIDAD DE PAQUETES (5kg c/u)</label>
-                                <input type="number" class="serv-babyqty" data-id="${serv.id}" value="${serv.babyQty || 1}" min="1" step="1">
-                            </div>
-                            <div class="field">
-                                <label>COSTO ESTE SERVICIO</label>
-                                <div style="background:#eef2ff; padding:6px 10px; border-radius:12px; font-weight:bold;">$${costoUnit}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-                
-                document.querySelectorAll('.remove-servicio').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = parseInt(btn.dataset.id);
-                        eliminarServicio(id);
-                    });
-                });
-                document.querySelectorAll('.serv-tipo').forEach(select => {
-                    select.addEventListener('change', (e) => {
-                        const id = parseInt(select.dataset.id);
-                        const newTipo = select.value;
-                        const serv = servicios.find(s => s.id === id);
-                        if(serv) {
-                            serv.tipo = newTipo;
-                            if(newTipo === 'BABY EKKO 1' || newTipo === 'BABY EKKO 2') {
-                                serv.rangoPeso = undefined;
-                                serv.babyQty = serv.babyQty || 1;
-                            } else {
-                                serv.babyQty = undefined;
-                                serv.rangoPeso = serv.rangoPeso || '1-2';
-                            }
-                            renderServicios();
-                            actualizarTotales();
-                        }
-                    });
-                });
-                document.querySelectorAll('.serv-peso').forEach(select => {
-                    select.addEventListener('change', (e) => {
-                        const id = parseInt(select.dataset.id);
-                        const newPeso = select.value;
-                        const serv = servicios.find(s => s.id === id);
-                        if(serv && serv.tipo !== 'BABY EKKO 1' && serv.tipo !== 'BABY EKKO 2') {
-                            serv.rangoPeso = newPeso;
-                            renderServicios();
-                            actualizarTotales();
-                        }
-                    });
-                });
-                document.querySelectorAll('.serv-babyqty').forEach(input => {
-                    input.addEventListener('change', (e) => {
-                        const id = parseInt(input.dataset.id);
-                        let qty = parseInt(input.value) || 1;
-                        if(qty < 1) qty = 1;
-                        const serv = servicios.find(s => s.id === id);
-                        if(serv && (serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2')) {
-                            serv.babyQty = qty;
-                            renderServicios();
-                            actualizarTotales();
-                        }
-                    });
-                });
-            }
-            actualizarTotales();
-        }
-        
-        function eliminarServicio(id) {
-            servicios = servicios.filter(s => s.id !== id);
-            renderServicios();
-            actualizarTotales();
-        }
-        
-        function agregarServicio() {
-            const nuevoId = nextId++;
-            servicios.push({
-                id: nuevoId,
-                tipo: 'NORMAL',
-                rangoPeso: '1-2',
-                babyQty: null
-            });
-            renderServicios();
-            actualizarTotales();
-        }
-        
-        function generarTXT() {
-            const orden = getVal('ordNum') || generarNumeroOrden();
-            const cliente = getVal('cliName') || '---';
-            const telefono = getVal('cliPhone') || '---';
-            const fechaRec = getVal('recDate') || '---';
-            const fechaEnt = getVal('delDate') || '---';
-            const direccion = getVal('address') || '---';
-            const zona = getVal('zoneSelect') || '---';
-            
-            let serviciosDetalle = '';
-            let servicioTotalGeneral = 0;
-            servicios.forEach((serv, idx) => {
-                const costo = calcularCostoServicio(serv);
-                servicioTotalGeneral += costo;
-                if(serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2') {
-                    serviciosDetalle += `   ${idx+1}. ${serv.tipo} · ${serv.babyQty} paquete(s) 5kg → $${costo}\n`;
-                } else {
-                    serviciosDetalle += `   ${idx+1}. ${serv.tipo} · ${serv.rangoPeso} kg → $${costo}\n`;
+
+            // ============================================================
+            // 4. CÁLCULOS DE COSTOS
+            // ============================================================
+
+            function calcularCostoServicio(serv) {
+                const plan = serv.tipo;
+                if (plan === 'BABY EKKO 1') {
+                    const cantidad = serv.babyQty || 1;
+                    return PRECIOS_BABY['BABY EKKO 1'].precioUnitario * cantidad;
                 }
-            });
-            if(servicios.length === 0) serviciosDetalle = '   Ningún servicio agregado\n';
-            
-            const extrasActivos = [];
-            for (const [extra, precio] of Object.entries(PRECIOS_EXTRAS)) {
-                if (getChecked(`extra_${extra}`)) {
-                    extrasActivos.push(`${EXTRAS_NOMBRES[extra]} (+$${precio})`);
+                if (plan === 'BABY EKKO 2') {
+                    const cantidad = serv.babyQty || 1;
+                    return PRECIOS_BABY['BABY EKKO 2'].precioUnitario * cantidad;
                 }
+                const peso = serv.rangoPeso || '1-2';
+                const precioPlan = PRECIOS_KG[plan];
+                return precioPlan ? (precioPlan[peso] || 0) : 0;
             }
-            const extrasTexto = extrasActivos.length ? extrasActivos.join(', ') : 'Ninguno';
-            const extraMonto = calcExtras();
-            const prendas = getVal('garments') || '';
-            const planchDesc = getVal('ironDesc') || '';
-            const planchCosto = parseFloat(getVal('ironCost','0')) || 0;
-            const msgRecogida = getChecked('msgPickup');
-            const msgEntrega = getChecked('msgDelivery');
-            const direccionMensajeria = getVal('courierAddr') || '';
-            const deliveryMonto = calcDelivery();
-            const total = servicioTotalGeneral + extraMonto + planchCosto + deliveryMonto;
-            const recibido = parseFloat(getVal('receivedPay','0')) || 0;
-            const cambio = recibido - total;
-            const firmaEncargado = getVal('signStaff') || '_________________________';
-            const firmaCliente = getVal('signClient') || '_________________________';
-            const piezas = getVal('pieces') || '';
-            
-            let txt = '';
-            txt += '╔══════════════════════════════════════════════════════════════╗\n';
-            txt += '║                 LAVANDERÍA EKKO - ORDEN DE SERVICIO          ║\n';
-            txt += '╚══════════════════════════════════════════════════════════════╝\n\n';
-            txt += '┌──────────────────────────────────────────────────────────────┐\n';
-            txt += '│ DATOS DEL CLIENTE                                            │\n';
-            txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ N° ORDEN        : ${orden.padEnd(42)}│\n`;
-            txt += `│ CLIENTE         : ${cliente.padEnd(42)}│\n`;
-            txt += `│ TELÉFONO        : ${telefono.padEnd(42)}│\n`;
-            txt += `│ DIRECCIÓN       : ${direccion.padEnd(42)}│\n`;
-            txt += `│ ZONA MENSAJERÍA : ${zona.padEnd(42)}│\n`;
-            txt += `│ FECHA RECEPCIÓN : ${fechaRec.padEnd(42)}│\n`;
-            txt += `│ FECHA ENTREGA   : ${fechaEnt.padEnd(42)}│\n`;
-            txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            txt += '┌──────────────────────────────────────────────────────────────┐\n';
-            txt += '│ SERVICIOS SOLICITADOS (MÚLTIPLES)                            │\n';
-            txt += '├──────────────────────────────────────────────────────────────┤\n';
-            let lineasServ = serviciosDetalle.split('\n');
-            for(let line of lineasServ) if(line.trim()) txt += `│ ${line.padEnd(48)}│\n`;
-            txt += `│ COSTO TOTAL SERVICIOS : $${servicioTotalGeneral.toString().padStart(5)}                         │\n`;
-            txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            if(extrasActivos.length > 0 || planchCosto > 0) {
-                txt += '┌──────────────────────────────────────────────────────────────┐\n';
-                txt += '│ EXTRAS Y ADICIONALES                                        │\n';
-                txt += '├──────────────────────────────────────────────────────────────┤\n';
-                if(extrasActivos.length) txt += `│ EXTRAS         : ${extrasTexto.slice(0,42).padEnd(42)}│\n`;
-                txt += `│ MONTO EXTRAS   : $${extraMonto.toString().padStart(5)}                                      │\n`;
-                if(planchDesc) txt += `│ PLANCHADO      : ${planchDesc.slice(0,42).padEnd(42)}│\n`;
-                txt += `│ COSTO PLANCHADO: $${planchCosto.toString().padStart(5)}                                      │\n`;
-                txt += '└──────────────────────────────────────────────────────────────┘\n\n';
+
+            function calcTotalServicios() {
+                return servicios.reduce(function(sum, serv) { return sum + calcularCostoServicio(serv); }, 0);
             }
-            if(msgRecogida || msgEntrega || direccionMensajeria) {
-                txt += '┌──────────────────────────────────────────────────────────────┐\n';
-                txt += '│ MENSAJERÍA                                                   │\n';
-                txt += '├──────────────────────────────────────────────────────────────┤\n';
-                txt += `│ RECOGIDA       : ${msgRecogida ? 'SÍ' : 'NO'}                                  │\n`;
-                txt += `│ ENTREGA        : ${msgEntrega ? 'SÍ' : 'NO'}                                  │\n`;
-                if(direccionMensajeria) txt += `│ DIRECCIÓN ENVÍO: ${direccionMensajeria.slice(0,42).padEnd(42)}│\n`;
-                txt += `│ COSTO MENSAJERÍA: $${deliveryMonto.toString().padStart(5)}                                      │\n`;
-                txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            }
-            if(prendas) {
-                txt += '┌──────────────────────────────────────────────────────────────┐\n';
-                txt += '│ PRENDAS / DETALLE                                           │\n';
-                txt += '├──────────────────────────────────────────────────────────────┤\n';
-                for(let line of prendas.split(/\r?\n/)) txt += `│ ${line.slice(0,48).padEnd(48)}│\n`;
-                txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            }
-            if(piezas) {
-                txt += '┌──────────────────────────────────────────────────────────────┐\n';
-                txt += '│ OBSERVACIONES / PIEZAS                                      │\n';
-                txt += '├──────────────────────────────────────────────────────────────┤\n';
-                for(let line of piezas.split(/\r?\n/)) txt += `│ ${line.slice(0,48).padEnd(48)}│\n`;
-                txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            }
-            txt += '┌──────────────────────────────────────────────────────────────┐\n';
-            txt += '│ RESUMEN DE COBRO                                             │\n';
-            txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ Servicios de lavandería : $${servicioTotalGeneral.toString().padStart(8)}                              │\n`;
-            txt += `│ Extras                  : $${extraMonto.toString().padStart(8)}                              │\n`;
-            txt += `│ Planchado               : $${planchCosto.toString().padStart(8)}                              │\n`;
-            txt += `│ Mensajería              : $${deliveryMonto.toString().padStart(8)}                              │\n`;
-            txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ TOTAL A PAGAR           : $${total.toString().padStart(8)}                              │\n`;
-            txt += `│ RECIBIDO                : $${recibido.toString().padStart(8)}                              │\n`;
-            txt += `│ CAMBIO / FALTA          : ${cambio>=0 ? `$${cambio}` : `-$${Math.abs(cambio)}`}                              │\n`;
-            txt += '└──────────────────────────────────────────────────────────────┘\n\n';
-            txt += '┌──────────────────────────────────────────────────────────────┐\n';
-            txt += '│ FIRMAS                                                       │\n';
-            txt += '├──────────────────────────────────────────────────────────────┤\n';
-            txt += `│ ENCARGADO     : ${firmaEncargado.padEnd(37)}│\n`;
-            txt += `│ CLIENTE       : ${firmaCliente.padEnd(37)}│\n`;
-            txt += '└──────────────────────────────────────────────────────────────┘\n';
-            txt += `\nDocumento generado el ${new Date().toLocaleString()} | Lavandería EKKO\n`;
-            return txt;
-        }
-        
-        function descargarTXT() {
-            if(servicios.length === 0) { toastMsg('Agrega al menos un servicio antes de descargar', true); return; }
-            const txt = generarTXT();
-            const orden = getVal('ordNum') || generarNumeroOrden();
-            const blob = new Blob([txt], {type: 'text/plain;charset=utf-8'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `orden_${orden}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-            toastMsg('TXT descargado');
-        }
-        
-        function previsualizarTXT() {
-            if(servicios.length === 0) { toastMsg('Agrega al menos un servicio para previsualizar', true); return; }
-            const txt = generarTXT();
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;align-items:center;justify-content:center;';
-            const card = document.createElement('div');
-            card.style.cssText = 'background:white;border-radius:24px;max-width:90%;max-height:85%;overflow:auto;padding:20px;width:700px;';
-            card.innerHTML = `<h3 style="margin-bottom:12px;">Previsualización del TXT</h3><pre style="font-family:monospace;font-size:12px;white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:12px;">${txt.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</pre><button id="closePreview" style="margin-top:16px;padding:8px 24px;border-radius:40px;border:none;background:#2c6e9e;color:white;">Cerrar</button>`;
-            modal.appendChild(card);
-            document.body.appendChild(modal);
-            document.getElementById('closePreview').onclick = () => modal.remove();
-        }
-        
-        function toastMsg(msg, isErr=false) {
-            let t = $('globalToast');
-            if(!t) return;
-            t.innerText = msg;
-            t.style.backgroundColor = isErr ? '#b91c1c' : '#1e293b';
-            t.style.visibility = 'visible';
-            t.style.opacity = '1';
-            setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=> t.style.visibility = 'hidden', 250); }, 2300);
-        }
-        
-        function construirFormulario() {
-            const root = $('formRoot');
-            if(!root) return;
-            
-            let extrasHtml = '';
-            for (const [categoria, listaExtras] of Object.entries(CATEGORIAS_EXTRAS)) {
-                extrasHtml += `<div class="section"><h4>${categoria}</h4><div class="check-vertical">`;
-                for (const extra of listaExtras) {
-                    if (PRECIOS_EXTRAS[extra] !== undefined) {
-                        extrasHtml += `<label><input type="checkbox" id="extra_${extra}"> ${EXTRAS_NOMBRES[extra]} <span style="margin-left:auto; font-weight:500;">+$${PRECIOS_EXTRAS[extra]}</span></label>`;
+
+            function calcExtras() {
+                let total = 0;
+                for (var extra in PRECIOS_EXTRAS) {
+                    if (PRECIOS_EXTRAS.hasOwnProperty(extra)) {
+                        if (getChecked('extra_' + extra)) total += PRECIOS_EXTRAS[extra];
                     }
                 }
-                extrasHtml += `</div></div>`;
+                return total;
             }
-            
-            root.innerHTML = `
-                <div class="section"><h4>DATOS DEL CLIENTE</h4><div class="vertical-list">
-                    <div class="field"><label>N° Orden (opcional)</label><input type="text" id="ordNum" placeholder="Auto-generado"></div>
-                    <div class="field"><label>Cliente / Nombre</label><input type="text" id="cliName" placeholder="Ej: María Gómez"></div>
-                    <div class="field"><label>Teléfono</label><input type="tel" id="cliPhone" placeholder="+569XXXXXXXX"></div>
-                    <div class="field"><label>Fecha Recepción</label><input type="date" id="recDate"></div>
-                    <div class="field"><label>Fecha Entrega</label><input type="date" id="delDate"></div>
-                    <div class="field"><label>Dirección</label><input type="text" id="address" placeholder="Calle, número, referencia"></div>
-                    <div class="field"><label>Zona mensajería</label><select id="zoneSelect"><option value="Zona Corta $600">Zona Corta ($600)</option><option value="Zona Media $900">Zona Media ($900)</option><option value="Zona Larga $1200">Zona Larga ($1200)</option></select></div>
-                </div></div>
-                
-                <div class="section"><h4>SERVICIOS MÚLTIPLES (agrega varios planes)</h4><div id="serviciosListContainer" class="servicios-container"></div><button type="button" id="addServicioBtn" class="add-servicio-btn">+ Agregar otro servicio</button></div>
-                
-                ${extrasHtml}
-                
-                <div class="section"><h4>PRENDAS / DETALLE</h4><textarea id="garments" rows="2" placeholder="Ej: Camisas x3 (1.2 kg), Pantalones x2 (1.5 kg)"></textarea></div>
-                
-                <div class="section"><h4>PLANCHADO</h4><div class="vertical-list">
-                    <div class="field"><label>Descripción</label><input type="text" id="ironDesc" placeholder="Ej: Camisas, pantalones, vestidos"></div>
-                    <div class="field"><label>Costo ($)</label><input type="number" id="ironCost" value="0" step="100"></div>
-                </div></div>
-                
-                <div class="section"><h4>MENSAJERÍA</h4><div class="check-vertical">
-                    <label><input type="checkbox" id="msgPickup"> Recogida a domicilio</label>
-                    <label><input type="checkbox" id="msgDelivery"> Entrega a domicilio</label>
-                </div><div class="field" style="margin-top: 10px;"><input type="text" id="courierAddr" placeholder="Dirección para mensajería (si aplica)"></div></div>
-                
-                <div class="section"><h4>FIRMAS</h4><div class="vertical-list">
-                    <div class="field"><label>Encargado</label><input type="text" id="signStaff" placeholder="Nombre encargado"></div>
-                    <div class="field"><label>Cliente</label><input type="text" id="signClient" placeholder="Nombre cliente"></div>
-                </div></div>
-                
-                <div class="section"><h4>OBSERVACIONES / PIEZAS ESPECIALES</h4><textarea id="pieces" rows="2" placeholder="Detalles adicionales, conteo de piezas, manchas específicas, etc."></textarea></div>
-                
-                <div class="section" id="resumenFinalSection"><h4>RESUMEN DE COBRO</h4>
-                    <div class="totales">
-                        <div>Servicios total: <span id="servMount">$0</span></div>
-                        <div>Extras: <span id="extraMount">$0</span></div>
-                        <div>Planchado: <span id="ironMount">$0</span></div>
-                        <div>Mensajería: <span id="deliveryMount">$0</span></div>
-                        <div class="total-destacado">TOTAL: <span id="totalMount">$0</span></div>
-                    </div>
-                    <div class="vertical-list">
-                        <div class="field"><label>Monto recibido ($)</label><input type="number" id="receivedPay" value="0" step="100"></div>
-                        <div class="field"><label>Cambio / faltante</label><span id="changeMount" style="background:#eef2ff; padding:8px 12px; border-radius:40px; display:inline-block;">$0</span></div>
-                    </div>
-                    <input type="hidden" id="hiddenTotal">
-                </div>
-            `;
-            
-            const hoy = new Date().toISOString().split('T')[0];
-            const futuro = new Date(Date.now() + 2*86400000).toISOString().split('T')[0];
-            if(!getVal('recDate')) setVal('recDate', hoy);
-            if(!getVal('delDate')) setVal('delDate', futuro);
-            
-            servicios = [];
-            nextId = 1;
-            agregarServicio();
-            
-            const addBtn = $('addServicioBtn');
-            if(addBtn) addBtn.addEventListener('click', () => agregarServicio());
-            
-            for (const extra of Object.keys(PRECIOS_EXTRAS)) {
-                const chk = $(`extra_${extra}`);
-                if(chk) chk.addEventListener('change', actualizarTotales);
+
+            function calcDelivery() {
+                const z = getVal('zoneSelect', 'Zona Corta $600');
+                return COSTO_MENSAJERIA[z] || 0;
             }
-            $('ironCost')?.addEventListener('input', actualizarTotales);
-            $('receivedPay')?.addEventListener('input', actualizarTotales);
-            $('address')?.addEventListener('blur', suggestZoneByAddress);
-            $('zoneSelect')?.addEventListener('change', actualizarTotales);
-            
-            actualizarTotales();
-        }
-        
-        $('downloadBtn')?.addEventListener('click', descargarTXT);
-        $('previewBtn')?.addEventListener('click', previsualizarTXT);
-        construirFormulario();
-    })();
-</script>
+
+            // ============================================================
+            // 5. ACTUALIZACIÓN DE TOTALES EN UI
+            // ============================================================
+
+            function actualizarTotales() {
+                const servTotal = calcTotalServicios();
+                const extra = calcExtras();
+                const iron = parseFloat(getVal('ironCost', '0')) || 0;
+                const delivery = calcDelivery();
+                const total = servTotal + extra + iron + delivery;
+
+                if ($('servMount')) $('servMount').innerText = '$' + servTotal;
+                if ($('extraMount')) $('extraMount').innerText = '$' + extra;
+                if ($('ironMount')) $('ironMount').innerText = '$' + iron;
+                if ($('deliveryMount')) $('deliveryMount').innerText = '$' + delivery;
+                if ($('totalMount')) $('totalMount').innerText = '$' + total;
+
+                const pago = parseFloat(getVal('receivedPay', '0')) || 0;
+                const cambio = pago - total;
+                if ($('changeMount')) $('changeMount').innerHTML = cambio >= 0 ? '$' + cambio : '-$' + Math.abs(cambio);
+                if ($('hiddenTotal')) $('hiddenTotal').value = total;
+            }
+
+            function suggestZoneByAddress() {
+                const addr = getVal('address').toLowerCase();
+                if (!addr) return;
+                for (var k in ZONA_KEYWORDS) {
+                    if (ZONA_KEYWORDS.hasOwnProperty(k)) {
+                        if (addr.includes(k)) {
+                            setVal('zoneSelect', ZONA_KEYWORDS[k]);
+                            actualizarTotales();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // ============================================================
+            // 6. RENDER DE SERVICIOS MÚLTIPLES
+            // ============================================================
+
+            function renderServicios() {
+                const container = $('serviciosListContainer');
+                if (!container) return;
+                if (servicios.length === 0) {
+                    container.innerHTML =
+                        '<div style="padding:12px;text-align:center;background:#f9f9f9;border-radius:16px;">+ Agrega servicios usando el boton inferior</div>';
+                } else {
+                    container.innerHTML = '';
+                    servicios.forEach(function(serv, idx) {
+                        const div = document.createElement('div');
+                        div.className = 'servicio-item';
+                        div.dataset.id = serv.id;
+                        const costoUnit = calcularCostoServicio(serv);
+                        const isBaby = (serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2');
+                        div.innerHTML =
+                            '<div class="servicio-header"><span>Servicio #' + (idx + 1) +
+                            '</span><button class="remove-servicio" data-id="' + serv.id +
+                            '" title="Eliminar">X</button></div>' +
+                            '<div class="servicio-fields">' +
+                            '<div class="field"><label>TIPO PLAN</label><select class="serv-tipo" data-id="' + serv.id +
+                            '">' +
+                            '<option value="NORMAL"' + (serv.tipo === 'NORMAL' ? ' selected' : '') + '>NORMAL</option>' +
+                            '<option value="BASICO"' + (serv.tipo === 'BASICO' ? ' selected' : '') + '>BASICO</option>' +
+                            '<option value="PREMIUM"' + (serv.tipo === 'PREMIUM' ? ' selected' : '') + '>PREMIUM</option>' +
+                            '<option value="ESPECIAL"' + (serv.tipo === 'ESPECIAL' ? ' selected' : '') +
+                            '>ESPECIAL</option>' +
+                            '<option value="BABY EKKO 1"' + (serv.tipo === 'BABY EKKO 1' ? ' selected' : '') +
+                            '>BABY EKKO 1 (BASICO)</option>' +
+                            '<option value="BABY EKKO 2"' + (serv.tipo === 'BABY EKKO 2' ? ' selected' : '') +
+                            '>BABY EKKO 2 (PREMIUM)</option>' +
+                            '</select></div>' +
+                            '<div class="field" id="pesoField_' + serv.id + '" style="' + (isBaby ? 'display:none' : '') +
+                            '"><label>RANGO DE PESO (kg)</label><select class="serv-peso" data-id="' + serv.id + '">' +
+                            '<option value="1-2"' + (serv.rangoPeso === '1-2' ? ' selected' : '') + '>1-2 kg</option>' +
+                            '<option value="3-4"' + (serv.rangoPeso === '3-4' ? ' selected' : '') + '>3-4 kg</option>' +
+                            '<option value="5-6"' + (serv.rangoPeso === '5-6' ? ' selected' : '') + '>5-6 kg</option>' +
+                            '<option value="7"' + (serv.rangoPeso === '7' ? ' selected' : '') + '>7 kg</option>' +
+                            '</select></div>' +
+                            '<div class="field" id="babyQtyField_' + serv.id + '" style="' + (isBaby ? '' : 'display:none') +
+                            '"><label>CANTIDAD DE PAQUETES (5kg c/u)</label><input type="number" class="serv-babyqty" data-id="' +
+                            serv.id + '" value="' + (serv.babyQty || 1) + '" min="1" step="1"></div>' +
+                            '<div class="field"><label>COSTO ESTE SERVICIO</label><div style="background:#eef2ff;padding:6px 10px;border-radius:12px;font-weight:bold;">$' +
+                            costoUnit + '</div></div>' +
+                            '</div>';
+                        container.appendChild(div);
+                    });
+
+                    // Eventos: eliminar
+                    document.querySelectorAll('.remove-servicio').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            const id = parseInt(btn.dataset.id);
+                            eliminarServicio(id);
+                        });
+                    });
+
+                    // Eventos: cambio de tipo
+                    document.querySelectorAll('.serv-tipo').forEach(function(select) {
+                        select.addEventListener('change', function() {
+                            const id = parseInt(select.dataset.id);
+                            const newTipo = select.value;
+                            const serv = servicios.find(function(s) { return s.id === id; });
+                            if (serv) {
+                                serv.tipo = newTipo;
+                                if (newTipo === 'BABY EKKO 1' || newTipo === 'BABY EKKO 2') {
+                                    serv.rangoPeso = undefined;
+                                    serv.babyQty = serv.babyQty || 1;
+                                } else {
+                                    serv.babyQty = undefined;
+                                    serv.rangoPeso = serv.rangoPeso || '1-2';
+                                }
+                                renderServicios();
+                                actualizarTotales();
+                            }
+                        });
+                    });
+
+                    // Eventos: cambio de peso
+                    document.querySelectorAll('.serv-peso').forEach(function(select) {
+                        select.addEventListener('change', function() {
+                            const id = parseInt(select.dataset.id);
+                            const newPeso = select.value;
+                            const serv = servicios.find(function(s) { return s.id === id; });
+                            if (serv && serv.tipo !== 'BABY EKKO 1' && serv.tipo !== 'BABY EKKO 2') {
+                                serv.rangoPeso = newPeso;
+                                renderServicios();
+                                actualizarTotales();
+                            }
+                        });
+                    });
+
+                    // Eventos: cambio de cantidad baby
+                    document.querySelectorAll('.serv-babyqty').forEach(function(input) {
+                        input.addEventListener('change', function() {
+                            const id = parseInt(input.dataset.id);
+                            let qty = parseInt(input.value) || 1;
+                            if (qty < 1) qty = 1;
+                            const serv = servicios.find(function(s) { return s.id === id; });
+                            if (serv && (serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2')) {
+                                serv.babyQty = qty;
+                                renderServicios();
+                                actualizarTotales();
+                            }
+                        });
+                    });
+                }
+                actualizarTotales();
+            }
+
+            function eliminarServicio(id) {
+                servicios = servicios.filter(function(s) { return s.id !== id; });
+                renderServicios();
+                actualizarTotales();
+            }
+
+            function agregarServicio() {
+                const nuevoId = nextId++;
+                servicios.push({
+                    id: nuevoId,
+                    tipo: 'NORMAL',
+                    rangoPeso: '1-2',
+                    babyQty: null
+                });
+                renderServicios();
+                actualizarTotales();
+            }
+
+            // ============================================================
+            // 7. OBTENER DATOS COMPLETOS (para TXT y WhatsApp)
+            // ============================================================
+
+            function obtenerDatosCompletos() {
+                const orden = getVal('ordNum') || generarNumeroOrden();
+                const cliente = getVal('cliName') || '---';
+                const telefono = getVal('cliPhone') || '---';
+                const fechaRec = getVal('recDate') || '---';
+                const fechaEnt = getVal('delDate') || '---';
+                const direccion = getVal('address') || '---';
+                const zona = getVal('zoneSelect') || '---';
+
+                var serviciosDetalle = [];
+                var servicioTotalGeneral = 0;
+                servicios.forEach(function(serv, idx) {
+                    const costo = calcularCostoServicio(serv);
+                    servicioTotalGeneral += costo;
+                    if (serv.tipo === 'BABY EKKO 1' || serv.tipo === 'BABY EKKO 2') {
+                        serviciosDetalle.push((idx + 1) + '. ' + serv.tipo + ' · ' + (serv.babyQty || 1) +
+                            ' paq(s) 5kg -> $' + costo);
+                    } else {
+                        serviciosDetalle.push((idx + 1) + '. ' + serv.tipo + ' · ' + (serv.rangoPeso || '1-2') +
+                            ' kg -> $' + costo);
+                    }
+                });
+                if (servicios.length === 0) serviciosDetalle.push('Ningun servicio agregado');
+
+                var extrasActivos = [];
+                for (var extra in PRECIOS_EXTRAS) {
+                    if (PRECIOS_EXTRAS.hasOwnProperty(extra)) {
+                        if (getChecked('extra_' + extra)) {
+                            extrasActivos.push(EXTRAS_NOMBRES[extra] + ' (+$' + PRECIOS_EXTRAS[extra] + ')');
+                        }
+                    }
+                }
+                const extraMonto = calcExtras();
+                const prendas = getVal('garments') || '';
+                const planchDesc = getVal('ironDesc') || '';
+                const planchCosto = parseFloat(getVal('ironCost', '0')) || 0;
+                const msgRecogida = getChecked('msgPickup');
+                const msgEntrega = getChecked('msgDelivery');
+                const direccionMensajeria = getVal('courierAddr') || '';
+                const deliveryMonto = calcDelivery();
+                const total = servicioTotalGeneral + extraMonto + planchCosto + deliveryMonto;
+                const recibido = parseFloat(getVal('receivedPay', '0')) || 0;
+                const cambio = recibido - total;
+                const firmaEncargado = getVal('signStaff') || '_________________________';
+                const firmaCliente = getVal('signClient') || '_________________________';
+                const piezas = getVal('pieces') || '';
+
+                return {
+                    orden: orden,
+                    cliente: cliente,
+                    telefono: telefono,
+                    fechaRec: fechaRec,
+                    fechaEnt: fechaEnt,
+                    direccion: direccion,
+                    zona: zona,
+                    serviciosDetalle: serviciosDetalle,
+                    servicioTotalGeneral: servicioTotalGeneral,
+                    extrasActivos: extrasActivos,
+                    extraMonto: extraMonto,
+                    prendas: prendas,
+                    planchDesc: planchDesc,
+                    planchCosto: planchCosto,
+                    msgRecogida: msgRecogida,
+                    msgEntrega: msgEntrega,
+                    direccionMensajeria: direccionMensajeria,
+                    deliveryMonto: deliveryMonto,
+                    total: total,
+                    recibido: recibido,
+                    cambio: cambio,
+                    firmaEncargado: firmaEncargado,
+                    firmaCliente: firmaCliente,
+                    piezas: piezas
+                };
+            }
+
+            // ============================================================
+            // 8. GENERAR TXT (formato simple, sin caracteres especiales)
+            // ============================================================
+
+            function generarTXT() {
+                if (servicios.length === 0) {
+                    toastMsg('Agrega al menos un servicio antes de descargar', true);
+                    return null;
+                }
+                const d = obtenerDatosCompletos();
+
+                var txt = '';
+                txt += '============================================================\n';
+                txt += '              LAVANDERIA EKKO - ORDEN DE SERVICIO           \n';
+                txt += '============================================================\n\n';
+
+                txt += '--- DATOS DEL CLIENTE ---\n';
+                txt += 'N° Orden       : ' + d.orden + '\n';
+                txt += 'Cliente        : ' + d.cliente + '\n';
+                txt += 'Telefono       : ' + d.telefono + '\n';
+                txt += 'Direccion      : ' + d.direccion + '\n';
+                txt += 'Zona mensajeria: ' + d.zona + '\n';
+                txt += 'Fecha recepcion: ' + d.fechaRec + '\n';
+                txt += 'Fecha entrega  : ' + d.fechaEnt + '\n\n';
+
+                txt += '--- SERVICIOS SOLICITADOS ---\n';
+                d.serviciosDetalle.forEach(function(line) { txt += line + '\n'; });
+                txt += 'Costo total servicios: $' + d.servicioTotalGeneral + '\n\n';
+
+                if (d.extrasActivos.length > 0 || d.planchCosto > 0) {
+                    txt += '--- EXTRAS Y ADICIONALES ---\n';
+                    if (d.extrasActivos.length) txt += 'Extras: ' + d.extrasActivos.join(', ') + '\n';
+                    txt += 'Monto extras: $' + d.extraMonto + '\n';
+                    if (d.planchDesc) txt += 'Planchado: ' + d.planchDesc + '\n';
+                    txt += 'Costo planchado: $' + d.planchCosto + '\n\n';
+                }
+
+                if (d.msgRecogida || d.msgEntrega || d.direccionMensajeria) {
+                    txt += '--- MENSAJERIA ---\n';
+                    txt += 'Recogida a domicilio: ' + (d.msgRecogida ? 'SI' : 'NO') + '\n';
+                    txt += 'Entrega a domicilio: ' + (d.msgEntrega ? 'SI' : 'NO') + '\n';
+                    if (d.direccionMensajeria) txt += 'Direccion envio: ' + d.direccionMensajeria + '\n';
+                    txt += 'Costo mensajeria: $' + d.deliveryMonto + '\n\n';
+                }
+
+                if (d.prendas) {
+                    txt += '--- PRENDAS / DETALLE ---\n';
+                    txt += d.prendas + '\n\n';
+                }
+
+                if (d.piezas) {
+                    txt += '--- OBSERVACIONES / PIEZAS ---\n';
+                    txt += d.piezas + '\n\n';
+                }
+
+                txt += '--- RESUMEN DE COBRO ---\n';
+                txt += 'Servicios de lavanderia: $' + d.servicioTotalGeneral + '\n';
+                txt += 'Extras                 : $' + d.extraMonto + '\n';
+                txt += 'Planchado              : $' + d.planchCosto + '\n';
+                txt += 'Mensajeria             : $' + d.deliveryMonto + '\n';
+                txt += 'TOTAL A PAGAR          : $' + d.total + '\n';
+                txt += 'Recibido               : $' + d.recibido + '\n';
+                txt += 'Cambio / faltante      : ' + (d.cambio >= 0 ? '$' + d.cambio : '-$' + Math.abs(d.cambio)) +
+                '\n\n';
+
+                txt += '--- FIRMAS ---\n';
+                txt += 'Encargado: ' + d.firmaEncargado + '\n';
+                txt += 'Cliente  : ' + d.firmaCliente + '\n\n';
+
+                txt += 'Documento generado el ' + new Date().toLocaleString() + ' | Lavanderia EKKO\n';
+                return txt;
+            }
+
+            // ============================================================
+            // 9. GENERAR MENSAJE WHATSAPP (formato simple, sin emojis)
+            // ============================================================
+
+            function generarMensajeWhatsApp() {
+                if (servicios.length === 0) {
+                    toastMsg('Agrega al menos un servicio para enviar', true);
+                    return null;
+                }
+                const d = obtenerDatosCompletos();
+
+                var msg = '';
+                msg += 'LAVANDERIA EKKO - ORDEN DE SERVICIO\n';
+                msg += '====================================\n\n';
+
+                msg += '--- DATOS DEL CLIENTE ---\n';
+                msg += 'N° Orden       : ' + d.orden + '\n';
+                msg += 'Cliente        : ' + d.cliente + '\n';
+                msg += 'Telefono       : ' + d.telefono + '\n';
+                msg += 'Direccion      : ' + d.direccion + '\n';
+                msg += 'Zona mensajeria: ' + d.zona + '\n';
+                msg += 'Fecha recepcion: ' + d.fechaRec + '\n';
+                msg += 'Fecha entrega  : ' + d.fechaEnt + '\n\n';
+
+                msg += '--- SERVICIOS SOLICITADOS ---\n';
+                d.serviciosDetalle.forEach(function(line) { msg += line + '\n'; });
+                msg += 'Costo total servicios: $' + d.servicioTotalGeneral + '\n\n';
+
+                if (d.extrasActivos.length > 0 || d.planchCosto > 0) {
+                    msg += '--- EXTRAS Y ADICIONALES ---\n';
+                    if (d.extrasActivos.length) msg += 'Extras: ' + d.extrasActivos.join(', ') + '\n';
+                    msg += 'Monto extras: $' + d.extraMonto + '\n';
+                    if (d.planchDesc) msg += 'Planchado: ' + d.planchDesc + '\n';
+                    msg += 'Costo planchado: $' + d.planchCosto + '\n\n';
+                }
+
+                if (d.msgRecogida || d.msgEntrega || d.direccionMensajeria) {
+                    msg += '--- MENSAJERIA ---\n';
+                    msg += 'Recogida a domicilio: ' + (d.msgRecogida ? 'SI' : 'NO') + '\n';
+                    msg += 'Entrega a domicilio: ' + (d.msgEntrega ? 'SI' : 'NO') + '\n';
+                    if (d.direccionMensajeria) msg += 'Direccion envio: ' + d.direccionMensajeria + '\n';
+                    msg += 'Costo mensajeria: $' + d.deliveryMonto + '\n\n';
+                }
+
+                if (d.prendas) {
+                    msg += '--- PRENDAS / DETALLE ---\n';
+                    msg += d.prendas + '\n\n';
+                }
+
+                if (d.piezas) {
+                    msg += '--- OBSERVACIONES / PIEZAS ---\n';
+                    msg += d.piezas + '\n\n';
+                }
+
+                msg += '--- RESUMEN DE COBRO ---\n';
+                msg += 'Servicios de lavanderia: $' + d.servicioTotalGeneral + '\n';
+                msg += 'Extras                 : $' + d.extraMonto + '\n';
+                msg += 'Planchado              : $' + d.planchCosto + '\n';
+                msg += 'Mensajeria             : $' + d.deliveryMonto + '\n';
+                msg += 'TOTAL A PAGAR          : $' + d.total + '\n';
+                msg += 'Recibido               : $' + d.recibido + '\n';
+                msg += 'Cambio / faltante      : ' + (d.cambio >= 0 ? '$' + d.cambio : '-$' + Math.abs(d.cambio)) +
+                '\n\n';
+
+                msg += '--- FIRMAS ---\n';
+                msg += 'Encargado: ' + d.firmaEncargado + '\n';
+                msg += 'Cliente  : ' + d.firmaCliente + '\n\n';
+
+                msg += 'Documento generado el ' + new Date().toLocaleString() + ' | Lavanderia EKKO';
+                return msg;
+            }
+
+            // ============================================================
+            // 10. ACCIONES: DESCARGAR TXT, PREVISUALIZAR, WHATSAPP
+            // ============================================================
+
+            function descargarTXT() {
+                const txt = generarTXT();
+                if (!txt) return;
+                const orden = getVal('ordNum') || generarNumeroOrden();
+                const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'orden_' + orden + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+                toastMsg('TXT descargado');
+            }
+
+            function previsualizarTXT() {
+                const txt = generarTXT();
+                if (!txt) return;
+                const modal = document.createElement('div');
+                modal.style.cssText =
+                    'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;align-items:center;justify-content:center;';
+                const card = document.createElement('div');
+                card.style.cssText =
+                    'background:white;border-radius:24px;max-width:90%;max-height:85%;overflow:auto;padding:20px;width:700px;';
+                card.innerHTML = '<h3 style="margin-bottom:12px;">Previsualizacion del TXT</h3><pre style="font-family:monospace;font-size:12px;white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:12px;">' +
+                    txt.replace(/[&<>]/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' } [m] }) +
+                    '</pre><button id="closePreview" style="margin-top:16px;padding:8px 24px;border-radius:40px;border:none;background:#2c6e9e;color:white;">Cerrar</button>';
+                modal.appendChild(card);
+                document.body.appendChild(modal);
+                document.getElementById('closePreview').onclick = function() { modal.remove(); };
+            }
+
+            function enviarWhatsApp() {
+                const telefonoRaw = getVal('cliPhone');
+                if (!telefonoRaw) {
+                    toastMsg('Ingresa el numero de telefono del cliente', true);
+                    return;
+                }
+                var numero = telefonoRaw.replace(/[^\d+]/g, '');
+                if (!numero.startsWith('+')) {
+                    if (numero.startsWith('56')) {
+                        numero = '+' + numero;
+                    } else {
+                        numero = '+56' + numero;
+                    }
+                }
+                numero = numero.replace(/\s/g, '');
+
+                const mensaje = generarMensajeWhatsApp();
+                if (!mensaje) return;
+
+                const url = 'https://wa.me/' + encodeURIComponent(numero) + '?text=' + encodeURIComponent(mensaje);
+                window.open(url, '_blank');
+                toastMsg('Mensaje abierto en WhatsApp');
+            }
+
+            // ============================================================
+            // 11. CONSTRUIR FORMULARIO
+            // ============================================================
+
+            function construirFormulario() {
+                const root = $('formRoot');
+                if (!root) return;
+
+                var extrasHtml = '';
+                for (var categoria in CATEGORIAS_EXTRAS) {
+                    if (CATEGORIAS_EXTRAS.hasOwnProperty(categoria)) {
+                        extrasHtml += '<div class="section"><h4>' + categoria + '</h4><div class="check-vertical">';
+                        var lista = CATEGORIAS_EXTRAS[categoria];
+                        for (var i = 0; i < lista.length; i++) {
+                            var extra = lista[i];
+                            if (PRECIOS_EXTRAS[extra] !== undefined) {
+                                extrasHtml += '<label><input type="checkbox" id="extra_' + extra + '"> ' +
+                                    EXTRAS_NOMBRES[extra] +
+                                    ' <span style="margin-left:auto;font-weight:500;">+$' + PRECIOS_EXTRAS[extra] +
+                                    '</span></label>';
+                            }
+                        }
+                        extrasHtml += '</div></div>';
+                    }
+                }
+
+                root.innerHTML =
+                    '<div class="section"><h4>DATOS DEL CLIENTE</h4><div class="vertical-list">' +
+                    '<div class="field"><label>N° Orden (opcional)</label><input type="text" id="ordNum" placeholder="Auto-generado"></div>' +
+                    '<div class="field"><label>Cliente / Nombre</label><input type="text" id="cliName" placeholder="Ej: Maria Gomez"></div>' +
+                    '<div class="field"><label>Telefono</label><input type="tel" id="cliPhone" placeholder="+569XXXXXXXX"></div>' +
+                    '<div class="field"><label>Fecha Recepcion</label><input type="date" id="recDate"></div>' +
+                    '<div class="field"><label>Fecha Entrega</label><input type="date" id="delDate"></div>' +
+                    '<div class="field"><label>Direccion</label><input type="text" id="address" placeholder="Calle, numero, referencia"></div>' +
+                    '<div class="field"><label>Zona mensajeria</label><select id="zoneSelect"><option value="Zona Corta $600">Zona Corta ($600)</option><option value="Zona Media $900">Zona Media ($900)</option><option value="Zona Larga $1200">Zona Larga ($1200)</option></select></div>' +
+                    '</div></div>' +
+
+                    '<div class="section"><h4>SERVICIOS MULTIPLES (agrega varios planes)</h4><div id="serviciosListContainer" class="servicios-container"></div><button type="button" id="addServicioBtn" class="add-servicio-btn">+ Agregar otro servicio</button></div>' +
+
+                    extrasHtml +
+
+                    '<div class="section"><h4>PRENDAS / DETALLE</h4><textarea id="garments" rows="2" placeholder="Ej: Camisas x3 (1.2 kg), Pantalones x2 (1.5 kg)"></textarea></div>' +
+
+                    '<div class="section"><h4>PLANCHADO</h4><div class="vertical-list">' +
+                    '<div class="field"><label>Descripcion</label><input type="text" id="ironDesc" placeholder="Ej: Camisas, pantalones, vestidos"></div>' +
+                    '<div class="field"><label>Costo ($)</label><input type="number" id="ironCost" value="0" step="100"></div>' +
+                    '</div></div>' +
+
+                    '<div class="section"><h4>MENSAJERIA</h4><div class="check-vertical">' +
+                    '<label><input type="checkbox" id="msgPickup"> Recogida a domicilio</label>' +
+                    '<label><input type="checkbox" id="msgDelivery"> Entrega a domicilio</label>' +
+                    '</div><div class="field" style="margin-top:10px;"><input type="text" id="courierAddr" placeholder="Direccion para mensajeria (si aplica)"></div></div>' +
+
+                    '<div class="section"><h4>FIRMAS</h4><div class="vertical-list">' +
+                    '<div class="field"><label>Encargado</label><input type="text" id="signStaff" value="76041701461" readonly></div>' +
+                    '<div class="field"><label>Cliente</label><input type="text" id="signClient" placeholder="Nombre cliente"></div>' +
+                    '</div></div>' +
+
+                    '<div class="section"><h4>OBSERVACIONES / PIEZAS ESPECIALES</h4><textarea id="pieces" rows="2" placeholder="Detalles adicionales, conteo de piezas, manchas especificas, etc."></textarea></div>' +
+
+                    '<div class="section" id="resumenFinalSection"><h4>RESUMEN DE COBRO</h4>' +
+                    '<div class="totales">' +
+                    '<div>Servicios total: <span id="servMount">$0</span></div>' +
+                    '<div>Extras: <span id="extraMount">$0</span></div>' +
+                    '<div>Planchado: <span id="ironMount">$0</span></div>' +
+                    '<div>Mensajeria: <span id="deliveryMount">$0</span></div>' +
+                    '<div class="total-destacado">TOTAL: <span id="totalMount">$0</span></div>' +
+                    '</div>' +
+                    '<div class="vertical-list">' +
+                    '<div class="field"><label>Monto recibido ($)</label><input type="number" id="receivedPay" value="0" step="100"></div>' +
+                    '<div class="field"><label>Cambio / faltante</label><span id="changeMount" style="background:#eef2ff;padding:8px 12px;border-radius:40px;display:inline-block;">$0</span></div>' +
+                    '</div>' +
+                    '<input type="hidden" id="hiddenTotal">' +
+                    '</div>';
+
+                // Fechas por defecto
+                const hoy = new Date().toISOString().split('T')[0];
+                const futuro = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
+                if (!getVal('recDate')) setVal('recDate', hoy);
+                if (!getVal('delDate')) setVal('delDate', futuro);
+
+                // Inicializar servicios
+                servicios = [];
+                nextId = 1;
+                agregarServicio();
+
+                // Evento: agregar servicio
+                const addBtn = $('addServicioBtn');
+                if (addBtn) addBtn.addEventListener('click', function() { agregarServicio(); });
+
+                // Eventos: extras
+                for (var extraKey in PRECIOS_EXTRAS) {
+                    if (PRECIOS_EXTRAS.hasOwnProperty(extraKey)) {
+                        var chk = $('extra_' + extraKey);
+                        if (chk) chk.addEventListener('change', actualizarTotales);
+                    }
+                }
+
+                // Eventos: planchado, pago, dirección, zona
+                const ironCost = $('ironCost');
+                if (ironCost) ironCost.addEventListener('input', actualizarTotales);
+                const receivedPay = $('receivedPay');
+                if (receivedPay) receivedPay.addEventListener('input', actualizarTotales);
+                const address = $('address');
+                if (address) address.addEventListener('blur', suggestZoneByAddress);
+                const zoneSelect = $('zoneSelect');
+                if (zoneSelect) zoneSelect.addEventListener('change', actualizarTotales);
+
+                actualizarTotales();
+            }
+
+            // ============================================================
+            // 12. INICIALIZACIÓN
+            // ============================================================
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const downloadBtn = $('downloadBtn');
+                if (downloadBtn) downloadBtn.addEventListener('click', descargarTXT);
+
+                const previewBtn = $('previewBtn');
+                if (previewBtn) previewBtn.addEventListener('click', previsualizarTXT);
+
+                const whatsappBtn = $('whatsappBtn');
+                if (whatsappBtn) whatsappBtn.addEventListener('click', enviarWhatsApp);
+
+                construirFormulario();
+            });
+
+        })();
+    </script>
 </body>
 </html>
